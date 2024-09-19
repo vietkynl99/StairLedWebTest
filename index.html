@@ -1,0 +1,151 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Stair Led | Dashboard</title>
+    <link rel="stylesheet" href="https://fonts.googleapis.com/icon?family=Material+Icons">
+    <link href="css/styles.css" rel="stylesheet">
+</head>
+
+<body>
+    <div class="header">
+        <h2>Stair Led - Test</h2>
+        <button id="toggleConnectionBtn" class="button">
+            <i id="bluetooth-icon" class="material-icons">bluetooth_disabled</i>
+        </button>
+    </div>
+
+    <div class="tabs">
+        <button class="tablinks active" onclick="openTab(event, 'generalSettings')">Chung</button>
+        <button class="tablinks" onclick="openTab(event, 'sensorSettings')">Cảm biến</button>
+        <button class="tablinks" onclick="openTab(event, 'softwareUpdate')">Cập nhật</button>
+        <button class="tablinks" onclick="openTab(event, 'terminalTab')">Terminal</button>
+    </div>
+
+    <div id="generalSettings" class="tab-content active">
+        <div class="form-group">
+            <label for="stairMode">Chế độ:</label>
+            <select id="stairMode">
+                <option value="manual">Thủ công</option>
+                <option value="auto">Tự động</option>
+            </select>
+        </div>
+        <div class="form-group">
+            <span>Độ sáng:</span>
+            <span class="slider-value" id="brightnessValue">--</span>
+            <span>%</span>
+            <input type="range" id="brightness" min="1" max="100" value="1" oninput="updateSlider('brightness')">
+        </div>
+        <div class="form-group">
+            <span>Thời gian sáng mờ:</span>
+            <span class="slider-value" id="fadeTimeValue">--</span>
+            <span>ms</span>
+            <input type="range" id="fadeTime" min="100" max="5000" value="100" oninput="updateSlider('fadeTime')">
+        </div>
+        <div class="form-group">
+            <span>Thời gian sáng giữa hai bậc:</span>
+            <span class="slider-value" id="intervalTimeValue">--</span>
+            <span>ms</span>
+            <input type="range" id="intervalTime" min="1" max="5000" value="1" oninput="updateSlider('intervalTime')">
+        </div>
+        <div class="form-group">
+            <span>Thời gian chờ trong chế độ thủ công:</span>
+            <span class="slider-value" id="manualWaitTimeValue">--</span>
+            <span>s</span>
+            <input type="range" id="manualWaitTime" min="10" max="1800" value="10"
+                oninput="updateSlider('manualWaitTime')">
+        </div>
+        <div class="form-group">
+            <span>Thời gian chờ trong chế độ tự động:</span>
+            <span class="slider-value" id="autoWaitTimeValue">--</span>
+            <span>s</span>
+            <input type="range" id="autoWaitTime" min="10" max="1800" value="10" oninput="updateSlider('autoWaitTime')">
+        </div>
+        <div class="form-group">
+            <label for="enableTimer">Hẹn giờ:</label>
+            <input type="checkbox" id="enableTimer">
+            <input type="time" id="timerOnTime" style="display: none;">
+            <label id="timeHyphen" style="display: none;">-</label>
+            <input type="time" id="timerOffTime" style="display: none;">
+        </div>
+        <button class="button" onclick="loadSettings()">Làm mới</button>
+        <button class="button" onclick="resetToDefault()">Khôi phục mặc định</button>
+    </div>
+
+    <div id="sensorSettings" class="tab-content">
+        <div class="sensor-container">
+            <div class="sensor-group">
+                <label>Cảm biến 1</label>
+                <div class="sensor-controls">
+                    <div class="sensor-item">
+                        <span>Khoảng cách:</span>
+                        <span id="threshold1">--</span>
+                        <span>mm</span>
+                        <button class="button small-button" onclick="sendRequest('changeThreshold', 0)">Thay
+                            đổi</button>
+                    </div>
+                    <div class="sensor-item">
+                        <span>Độ nhạy:</span>
+                        <input type="range" id="sensorSens1" min="1" max="100" value="1"
+                            oninput="updateSlider('sensorSens1')">
+                        <span id="sensorSens1Value">--</span>
+                    </div>
+                    <div class="sensor-buttons">
+                        <button class="button small-button" onclick="sendRequestSaveSensor(0)">Lưu</button>
+                        <button class="button small-button" onclick="sendRequest('testSensor', 0)">Kiểm tra</button>
+                    </div>
+                </div>
+            </div>
+
+            <div class="sensor-group">
+                <label>Cảm biến 2</label>
+                <div class="sensor-controls">
+                    <div class="sensor-item">
+                        <span>Khoảng cách:</span>
+                        <span id="threshold2">--</span>
+                        <span>mm</span>
+                        <button class="button small-button" onclick="sendRequest('changeThreshold', 1)">Thay
+                            đổi</button>
+                    </div>
+                    <div class="sensor-item">
+                        <span>Độ nhạy:</span>
+                        <input type="range" id="sensorSens2" min="1" max="100" value="1"
+                            oninput="updateSlider('sensorSens2')">
+                        <span id="sensorSens2Value">--</span>
+                    </div>
+                    <div class="sensor-buttons">
+                        <button class="button small-button" onclick="sendRequestSaveSensor(1)">Lưu</button>
+                        <button class="button small-button" onclick="sendRequest('testSensor', 1)">Kiểm tra</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div id="softwareUpdate" class="tab-content">
+        <span>Phiên bản:</span>
+        <div id="version" class="version">------.----</div>
+
+        <label>Cập nhật OTA:</label>
+        <form class="form-group distance-setting" id="upload_form" enctype="multipart/form-data">
+            <input type='file' name='update' accept=".ino.bin">
+            <button class="button" id="uploadBtn">Cập nhật</button>
+        </form>
+    </div>
+
+    <div id="terminalTab" class="tab-content">
+        <div id="chatMessages" class="chat-messages"></div>
+        <input type="text" id="chatInput" class="chat-input" placeholder="Type a message...">
+    </div>
+
+    <div id="notification" class="notification"></div>
+
+    <!-- Scripts -->
+    <script src="js/ui.js"></script>
+    <script src="js/BluetoothTerminal.js"></script>
+    <script src="js/terminal.js"></script>
+</body>
+
+</html>
